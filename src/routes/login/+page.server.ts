@@ -21,13 +21,13 @@ export const actions: Actions = {
       const existingUser = await prisma.user.findUnique({
         where: {
           name: username,
-        },
+        }, 
       });
 
       if (existingUser) {
         const providedPassword = data.get("password")?.toString();
         if (providedPassword != existingUser.password) {
-          return fail(400, {password: "incorrect password"})
+          return fail(400, {password: "Incorrect password"})
 
         } else {
           cookies.set("id", existingUser.id.toString());
