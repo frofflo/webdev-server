@@ -14,5 +14,21 @@ model User {
   id       Int     @id @default(autoincrement())
   name     String  @unique
   password String?
+  posts Message[]
+}
+
+model Session {
+  id       Int      @id @default(autoincrement())
+  name     String   @unique
+  messages Message[]
+}
+
+model Message {
+  id         Int       @id @default(autoincrement())
+  content    String
+  userId     Int
+  sender     User     @relation(fields: [userId], references: [id])
+  sessionId  Int?
+  session    Session?   @relation(fields: [sessionId], references: [id])
 }
 

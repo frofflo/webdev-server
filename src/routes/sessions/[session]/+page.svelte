@@ -20,19 +20,19 @@
     }
 
 </script>
-{#if form?.message}
-    <span class="error alertTabSlide">{form.message}</span>
+{#if form?.msg}
+    <span class="error alertTabSlide">{form.msg}</span>
 {/if}
 <div class="backGround">
     <div class="leftSide">
         <h1 class="heading">Välkommen:<span class="myUser">{data.username}</span>!,Till sessionen:<span style="color: white;">{data.session}</span></h1>
         <div class="textChat" style="overflow-y:scroll;" bind:this={textChat}>
             {#each data.messages as message}
-            {#if message.username==data.username}
-                <span class="myMessage"><span class="Message">{message.message}:</span><span class="myUser">{message.username}</span></span>
+            {#if message.user==data.username}
+                <span class="myMessage"><span class="Message">{message.content}:</span><span class="myUser">{message.user}</span></span>
             {/if}
-            {#if message.username!=data.username}
-                <span class="diffText"><span class="diffUser">{message.username}:</span><span class="diffMessage">{message.message}</span></span>
+            {#if message.user!=data.username}
+                <span class="diffText"><span class="diffUser">{message.user}:</span><span class="diffMessage">{message.content}</span></span>
             {/if}
             <br>
             {/each}
@@ -88,6 +88,9 @@
         text-align: center;
     }
     .inputBackground{
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
         width: 95%;
         height: 14%;
         background-color: #FE8E3D;
@@ -100,7 +103,6 @@
         width: 100%;
         display: flex;
         justify-content: space-evenly;
-        margin-top: 4.5%;
     }
     .messageBar{
         width: 75%;

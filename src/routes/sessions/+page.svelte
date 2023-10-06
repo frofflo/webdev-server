@@ -7,7 +7,7 @@
     export let data: PageData;
     export let form;
 
-    $: sessions = data?.sessions || [];
+    $: sessions = data?.sessionList;
 
     browser ? setInterval(invalidateAll, 1000) : null;
 
@@ -17,14 +17,12 @@
     <h1>Sessions</h1>
 
     <ul>
-        {#each sessions as [session, messages]}
-            <li><a href="/sessions/{session}">{session} - {messages.length}</a></li>
+        {#each sessions as session}
+            <li><a href="/sessions/{session}">{session.name} - {session.messages.length}</a></li>
         {/each}
     </ul>
     
     <a href="/">Home</a>
-    
-    <h2>New Session</h2>
     
     <form class="form" action="?/create" method="post" use:enhance>
         <input type="text" name="sessionName">
@@ -49,9 +47,5 @@
         font-family: "Courier New", Courier, monospace;
         font-weight: 600;
         font-size: 4em;
-    }
-    h2{
-        font-family: "Courier New", Courier, monospace;
-        font-weight: 600;
     }
 </style>

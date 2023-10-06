@@ -1,44 +1,60 @@
 import type { PageServerLoad } from './$types';
-import { _sessions } from '../+page.server';
 import { error, fail, type Actions, redirect } from '@sveltejs/kit';
+import { PrismaClient } from '@prisma/client';
+
+const prisma = new PrismaClient();
 
 export const load = (async ({params, cookies}) => {
-    let id = cookies.get("id")
-    let username = cookies.get("username")
+    const sessionName = params.session; // Här tror jag felet är med params då jag får en logg på params.session som heter [object Object]
+    const username = cookies.get('username');
 
-    if(!id){
+    if(!username){
         throw redirect(303, "/login")
     }
-    let session = params.session;
-
-    if(!_sessions.has(session)){
-        throw error(404, "Session not found");
+    let session = await prisma.session.findFirst({
+        where: { name: sessionName },
+        include: { messages: { include: { sender: true } } },
+    });
+    if (!session) {
+        console.log(sessionName)
+        throw error(404, 'Session not found');
     }
-
-    let messages = _sessions.get(session)!;
-
-
-    return { session, messages, username };
-}) satisfies PageServerLoad;
+    
+    return {
+        session: session.name,
+        messages: session.messages.map((message : any) => ({
+          content: message.content,
+          user: message.sender?.name,
+        })),
+        username: username,
+    };}) satisfies PageServerLoad;
 
 export const actions: Actions = {
     message: async ({ request, params, cookies }) => {
-        let username = cookies.get("username")
-        let session = params.session;
+        const username = cookies.get("username");
+        const sessionName = params.session;
+        const formData = await request.formData();
+        const msg = formData.get('message')?.toString();
 
-        if(!session || !_sessions.has(session)){
-            throw error(404, "session not found")
+        if (!msg) {
+            return fail(300, {msg: "No Message To Send"})
         }
-
-        let data = await request.formData();
-        let message = data.get("message")?.toString();
-
-        if(!message){
-            return fail(400, {message:"there is no message to send"})
+        const session = await prisma.session.findFirst({
+            where: { name: sessionName },
+        });
+        if (!session) {
+            throw error(404, 'Session not found');
         }
-        let messages = _sessions.get(session)!;
-        if(username){
-            messages?.push({message, username});
-        }
+        
+        const prismaUser = await prisma.user.findUnique({where: {name: username}});
+        const id = prismaUser?.id ? prismaUser.id : -1;
+    
+        await prisma.message.create({
+          data: {
+            content: msg,
+            userId: id, 
+            sessionId: session.id,
+          },
+        });
     },
 };

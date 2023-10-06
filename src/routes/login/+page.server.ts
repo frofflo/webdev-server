@@ -30,6 +30,7 @@ export const actions: Actions = {
           return fail(400, {password: "Incorrect password"})
 
         } else {
+
           cookies.set("id", existingUser.id.toString());
           cookies.set("username", existingUser.name.toString());
   

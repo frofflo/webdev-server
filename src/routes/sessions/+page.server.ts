@@ -1,31 +1,48 @@
 import { fail, type Actions, redirect } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
+import {PrismaClient} from "@prisma/client"
 
-export let _sessions : Map<string, {message:string,username:string}[]> = new Map();
-
+const prisma = new PrismaClient();
 
 export const load = (async({cookies}) => {
     let id = cookies.get("id")
     if(!id){
         throw redirect(303, "/login")
     }
-    return {sessions:_sessions};
+    const allSessions = await prisma.session.findMany({include: {messages: true}})
+    let sessionList : {name: string, messages: any[]}[] = []
+    allSessions.forEach((session : any) => {
+        sessionList.push({
+            name: session.name,
+            messages: session.messages
+        });
+    });
+
+    return {sessionList};
 }) satisfies PageServerLoad;
 
 export const actions: Actions = {
-    create: async ({request}) => {
+    create: async ({request, cookies}) => {
         let data = await request.formData();
+        let user = cookies.get("username")?.toString();
         let sessionName = data.get("sessionName")?.toString();
 
         if(!sessionName){
             return fail(400, {sessionName: "Please supply a name"})
         }
-        else if(_sessions.has(sessionName)){
-            return fail(400, {sessionName: "Session already excist"})
+        else if(await prisma.session.findFirst({where: {name: sessionName}})){
+            return fail(400, {sessionName: "Session already exists."})
         }
 
-        _sessions.set(sessionName, []);
-        
+        const User = await prisma.user.findFirst({where: {name: user}});
+        if(User){
+            await prisma.session.create({data: {
+                name: sessionName,
+            }})
+        }
+        else{
+            return fail(400, {sessionName: "Unable to find user."})
+        }        
         
     }
 };
