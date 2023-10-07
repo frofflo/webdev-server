@@ -29,7 +29,7 @@
         <div class="textChat" style="overflow-y:scroll;" bind:this={textChat}>
             {#each data.messages as message}
             {#if message.user==data.username}
-                <span class="myMessage"><span class="Message">{message.content}:</span><span class="myUser">{message.user}</span></span>
+                <span class="myMessage"><span class="Message">{message.content}</span><span class="myUser">:{message.user}</span></span>
             {/if}
             {#if message.user!=data.username}
                 <span class="diffText"><span class="diffUser">{message.user}:</span><span class="diffMessage">{message.content}</span></span>

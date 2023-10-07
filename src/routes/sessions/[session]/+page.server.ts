@@ -16,7 +16,6 @@ export const load = (async ({params, cookies}) => {
         include: { messages: { include: { sender: true } } },
     });
     if (!session) {
-        console.log(sessionName)
         throw error(404, 'Session not found');
     }
     
@@ -24,7 +23,7 @@ export const load = (async ({params, cookies}) => {
         session: session.name,
         messages: session.messages.map((message : any) => ({
           content: message.content,
-          user: message.sender?.name,
+          user: message.sender.name,
         })),
         username: username,
     };}) satisfies PageServerLoad;

@@ -18,7 +18,7 @@
 
     <ul>
         {#each sessions as session}
-            <li><a href="/sessions/{session}">{session.name} - {session.messages.length}</a></li>
+            <li><a href="/sessions/{session.name}">{session.name} - {session.messages.length}</a></li>
         {/each}
     </ul>
     
